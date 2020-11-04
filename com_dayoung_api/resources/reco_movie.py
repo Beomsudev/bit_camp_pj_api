@@ -146,9 +146,9 @@ class RecoMovieDao(RecoMovieDto):
         return session.query(func.count(RecoMovieDto.movieid)).one()
     
     @classmethod
-    def find_by_title(cls, title):
+    def find_by_title_kor(cls, title):
         print('##### find title #####')
-        return session.query(RecoMovieDto).filter(RecoMovieDto.movie_l_title.like(title)).all()
+        return session.query(RecoMovieDto).filter(RecoMovieDto.title_kor.like(title)).all()
     
     @classmethod
     def find_by_id(cls, movieid):
@@ -956,7 +956,7 @@ class RecoMovieSearch(Resource):
     def get(self, title):
         print("SEARCH 진입")
         print(f'타이틀 : {title}')
-        movie = RecoMovieDao.find_by_title(title)
+        movie = RecoMovieDao.find_by_title_kor(title)
         # review = {review[i]: review[i + 1] for i in range(0, len(review), 2)}
         # review = json.dump(review)
         movielist = []
