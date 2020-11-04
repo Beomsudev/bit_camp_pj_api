@@ -1,0 +1,35 @@
+# revision history
+# dayoung team requirements V1.0 / 1016 - first made
+# V2.0 / 1026 - flask-cors==3.0.9 추가 김범수
+
+click==7.1.2
+config==0.5.0.post0
+flask==1.1.2
+flask-jwt==0.3.2
+flask-restful==0.3.8
+flask-cors==3.0.9
+itsdangerous==1.1.0
+keras==2.4.3
+keras-preprocessing==1.1.2
+matplotlib==3.3.2
+mysql-connector-c==6.1.11
+mysql-connector-python==8.0.18
+numpy==1.18.5
+pandas==1.1.3
+protobuf==3.13.0
+python-dateutil==2.8.1
+pytz==2020.1
+requests==2.24.0
+requests-oauthlib==1.3.0
+resource==0.2.1
+setuptools==50.3.0
+sqlalchemy==1.3.20
+sqlite==3.33.0
+tensorboard==2.3.0
+tensorboard-plugin-wit==1.7.0
+tensorflow==2.3.1
+tensorflow-estimator==2.3.0
+tensorflow-hub==0.9.0
+termcolor==1.1.0
+urllib3==1.25.10
+xlrd==1.2.0
