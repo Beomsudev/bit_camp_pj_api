@@ -27,53 +27,102 @@ class RecoMovieDto(db.Model):
     __talbe_args__ = {'mysql_collate':'utf8_general_ci'}
     
     '''
-    DataFrame Columns
-    movieid, movie_l_title, movie_l_org_title, movie_l_genres, movie_l_year, movie_l_rating, movie_l_rating_count
+    DataFrame Columns(14)
+    'movieid', 
+    'title_kor', 
+    'title_naver_eng', 
+    'genres_kor', 
+    'keyword_kor',
+    'running_time_kor', 
+    'year_kor', 
+    'director_naver_kor', 
+    'actor_naver_kor',
+    'movie_l_rating', 
+    'movie_l_rating_count', 
+    'movie_l_popularity',
+    'link_naver', 
+    'image_naver'
     '''
     movieid : str = db.Column(db.String(10), primary_key = True, index = True)
-    movie_l_title : str = db.Column(db.String(150))
-    movie_l_org_title : str = db.Column(db.String(150))
-    movie_l_genres : str = db.Column(db.String(100))
-    movie_l_year : int = db.Column(db.String(4))
+    title_kor : str = db.Column(db.String(100))
+    title_naver_eng : str = db.Column(db.String(100))
+    genres_kor : str = db.Column(db.String(30))
+    keyword_kor : str = db.Column(db.String(150))
+    running_time_kor : int = db.Column(db.Integer)
+    year_kor : str = db.Column(db.String(4))
+    director_naver_kor : str = db.Column(db.String(400))
+    actor_naver_kor : str = db.Column(db.String(400))
     movie_l_rating : float = db.Column(db.Float)
     movie_l_rating_count : int = db.Column(db.Integer)
-# ,movieid,movie_l_title,movie_l_org_title,movie_l_genres,movie_l_year,movie_l_rating,movie_l_rating_count
+    movie_l_popularity : float = db.Column(db.Float)
+    link_naver : str = db.Column(db.String(80))
+    image_naver : str = db.Column(db.String(80))
+
     def __init__(self, 
                 movieid, 
-                movie_l_title,
-                movie_l_org_title, 
-                movie_l_genres, 
-                movie_l_year, 
-                movie_l_rating, 
-                movie_l_rating_count):
+                title_kor,
+                title_naver_eng, 
+                genres_kor, 
+                keyword_kor, 
+                running_time_kor, 
+                year_kor,
+                director_naver_kor,
+                actor_naver_kor,
+                movie_l_rating,
+                movie_l_rating_count,
+                movie_l_popularity,
+                link_naver,
+                image_naver
+                ):
         self.movieid = movieid
-        self.movie_l_title = movie_l_title
-        self.movie_l_org_title = movie_l_org_title
-        self.movie_l_genres = movie_l_genres
-        self.movie_l_year = movie_l_year
+        self.title_kor = title_kor
+        self.title_naver_eng = title_naver_eng
+        self.genres_kor = genres_kor
+        self.keyword_kor = keyword_kor
+        self.running_time_kor = running_time_kor
+        self.year_kor = year_kor
+        self.director_naver_kor = director_naver_kor
+        self.actor_naver_kor = actor_naver_kor
         self.movie_l_rating = movie_l_rating
         self.movie_l_rating_count = movie_l_rating_count
+        self.movie_l_popularity = movie_l_popularity
+        self.link_naver = link_naver
+        self.image_naver = image_naver
 
 
     def json(self):
         return {
             'movieid' : self.movieid,
-            'movie_l_title' : self.movie_l_title,
-            'movie_l_org_title' : self.movie_l_org_title,
-            'movie_l_genres' : self.movie_l_genres,
-            'movie_l_year' : self.movie_l_year,
+            'title_kor' : self.title_kor,
+            'title_naver_eng' : self.title_naver_eng,
+            'genres_kor' : self.genres_kor,
+            'keyword_kor' : self.keyword_kor,
+            'running_time_kor' : self.running_time_kor,
+            'year_kor' : self.year_kor,
+            'director_naver_kor' : self.director_naver_kor,
+            'actor_naver_kor' : self.actor_naver_kor,
             'movie_l_rating' : self.movie_l_rating,
-            'movie_l_rating_count' : self.movie_l_rating_count
+            'movie_l_rating_count' : self.movie_l_rating_count,
+            'movie_l_popularity' : self.movie_l_popularity,
+            'link_naver' : self.link_naver,
+            'image_naver' : self.image_naver
         }
 
 class RecoMovieVo():
     movieid: str = ''
-    movie_l_title: str = ''
-    movie_l_org_title: str = ''
-    movie_l_genres: str = ''
-    movie_l_year: int = 0
+    title_kor: str = ''
+    title_naver_eng: str = ''
+    genres_kor: str = ''
+    keyword_kor: str = ''
+    running_time_kor: int = 0
+    year_kor: str = ''
+    director_naver_kor: str = ''
+    actor_naver_kor: str = ''
     movie_l_rating: float = 0.0
     movie_l_rating_count: int = 0
+    movie_l_popularity: float = 0.0
+    link_naver: str = ''
+    image_naver: str = ''
 
 
 Session = openSession()
@@ -85,11 +134,11 @@ class RecoMovieDao(RecoMovieDto):
     def bulk():
         print('***** [movies_recommendation] df 삽입 완료 *****')
         recomoviedf = RecoMovieDf()
-        df = recomoviedf.hook()
-        print(df)
-        session.bulk_insert_mappings(RecoMovieDto, df.to_dict(orient='records'))
-        session.commit()
-        session.close()
+        # df = recomoviedf.hook()
+        # print(df)
+        # session.bulk_insert_mappings(RecoMovieDto, df.to_dict(orient='records'))
+        # session.commit()
+        # session.close()
         print('***** [movies_recommendation] df 삽입 완료 *****')
 
     @staticmethod
@@ -215,6 +264,7 @@ class RecoMovieDf:
 
         merge_movie_lens_kmdb_naver_df = self.merge_movie_lens_kmdb_naver_df(arrange_movie_lens_meta_df, arrange_kmdb_naver_df)
 
+        return merge_movie_lens_kmdb_naver_df
         # print(movie_lens_meta_df)
         # print(movie_lens_keyword_df)
         # print(movie_lens_credits_df)
@@ -253,7 +303,7 @@ class RecoMovieDf:
     def read_kmdb_naver_csv(self):
         print('***** kmdb 네이버 데이터 읽기*****')
         # path = os.path.abspath("")
-        # fname = '\com_dayoung_api\\kmdb_naver_search\saved_data\naver_movie_search_merge.csv'
+        # fname = '\com_dayoung_api\\resources\data\kmdb_naver_merge.csv'
         path = os.path.abspath("")
         fname = '\data\\kmdb_naver_merge.csv' 
         kmdb_naver_df = pd.read_csv(path + fname, encoding='utf-8')
@@ -733,11 +783,9 @@ class RecoMovieDf:
         return final_kmdb_naver_df
 
     def merge_movie_lens_kmdb_naver_df(self, arrange_movie_lens_meta_df, arrange_kmdb_naver_df):
+        print('***** 무비렌즈 KMDB NAVER MERGE 및 가공 *****')
         fchecker = self.filechecker
-        print(arrange_movie_lens_meta_df)
-        print(arrange_kmdb_naver_df)
         merge_df = pd.merge(arrange_movie_lens_meta_df, arrange_kmdb_naver_df, on='compare_column')
-        fchecker.df_null_check(merge_df)
         '''
         movieid                   : null count =      0
         movie_l_title             : null count =      0 -> drop
@@ -761,7 +809,33 @@ class RecoMovieDf:
         link_naver                : null count =      0
         image_naver               : null count =      0
         '''
+        drop_df = merge_df.drop([
+        'movie_l_title', 
+        'movie_l_org_title', 
+        'movie_l_genres',
+        'movie_l_year', 
+        'movie_l_overview', 
+        'movie_l_tagline',
+        'compare_column'], axis=1)
 
+        sort_df = drop_df[['movieid', 
+        'title_kor', 
+        'title_naver_eng', 
+        'genres_kor',
+        'keyword_kor', 
+        'running_time_kor', 
+        'year_kor', 
+        'director_naver_kor',
+        'actor_naver_kor',
+        'movie_l_rating', 
+        'movie_l_rating_count',
+        'movie_l_popularity', 
+        'link_naver', 
+        'image_naver']]
+        
+        final_merge_df = sort_df
+        print('***** 무비렌즈 KMDB NAVER MERGE 및 가공 완료 *****')
+        return final_merge_df
 
 if __name__ == "__main__":
     service = RecoMovieDf()
