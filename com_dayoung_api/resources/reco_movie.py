@@ -250,7 +250,7 @@ class RecoMovieDf:
         self.path = os.path.abspath("")
 
     def hook(self):
-        print('***** 무비 렌즈 서비스 시작 *****')
+        print('***** 무비 렌즈 UI용 DF가공 시작 *****')
 
         movie_lens_meta_df = self.read_movie_lens_meta_csv()
         # movie_lens_keyword_df = self.read_movie_lens_keyword_csv()
@@ -264,6 +264,7 @@ class RecoMovieDf:
 
         merge_movie_lens_kmdb_naver_df = self.merge_movie_lens_kmdb_naver_df(arrange_movie_lens_meta_df, arrange_kmdb_naver_df)
         
+        print('***** 무비 렌즈 UI용 DF가공 완료 *****')
 
         return merge_movie_lens_kmdb_naver_df
         # print(movie_lens_meta_df)
