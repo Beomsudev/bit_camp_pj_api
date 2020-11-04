@@ -50,8 +50,8 @@ class RecoMovieDto(db.Model):
     keyword_kor : str = db.Column(db.String(150))
     running_time_kor : int = db.Column(db.Integer)
     year_kor : str = db.Column(db.String(4))
-    director_naver_kor : str = db.Column(db.String(400))
-    actor_naver_kor : str = db.Column(db.String(400))
+    director_naver_kor : str = db.Column(db.String(50))
+    actor_naver_kor : str = db.Column(db.String(50))
     movie_l_rating : float = db.Column(db.Float)
     movie_l_rating_count : int = db.Column(db.Integer)
     movie_l_popularity : float = db.Column(db.Float)
@@ -134,11 +134,11 @@ class RecoMovieDao(RecoMovieDto):
     def bulk():
         print('***** [movies_recommendation] df 삽입 완료 *****')
         recomoviedf = RecoMovieDf()
-        # df = recomoviedf.hook()
-        # print(df)
-        # session.bulk_insert_mappings(RecoMovieDto, df.to_dict(orient='records'))
-        # session.commit()
-        # session.close()
+        df = recomoviedf.hook()
+        print(df)
+        session.bulk_insert_mappings(RecoMovieDto, df.to_dict(orient='records'))
+        session.commit()
+        session.close()
         print('***** [movies_recommendation] df 삽입 완료 *****')
 
     @staticmethod
@@ -263,6 +263,7 @@ class RecoMovieDf:
         arrange_kmdb_naver_df = self.arrange_kmdb_naver_df(kmdb_naver_df)
 
         merge_movie_lens_kmdb_naver_df = self.merge_movie_lens_kmdb_naver_df(arrange_movie_lens_meta_df, arrange_kmdb_naver_df)
+        
 
         return merge_movie_lens_kmdb_naver_df
         # print(movie_lens_meta_df)
@@ -272,10 +273,10 @@ class RecoMovieDf:
 
     def read_movie_lens_meta_csv(self):
         print('***** 무비렌즈 메타 데이터 읽기*****')
-        # path = os.path.abspath("")
-        # fname = '\com_dayoung_api\\resources\data\movie_lens\movies_metadata.csv'
         path = os.path.abspath("")
-        fname = '\data\movie_lens\movies_metadata.csv'
+        fname = '\com_dayoung_api\\resources\data\movie_lens\movies_metadata.csv'
+        # path = os.path.abspath("")
+        # fname = '\data\movie_lens\movies_metadata.csv'
         movie_lens_meta_df = pd.read_csv(path + fname, encoding='utf-8')
         print('***** 무비렌즈 메타 데이터 읽기 완료*****')
         return movie_lens_meta_df
@@ -302,10 +303,10 @@ class RecoMovieDf:
 
     def read_kmdb_naver_csv(self):
         print('***** kmdb 네이버 데이터 읽기*****')
-        # path = os.path.abspath("")
-        # fname = '\com_dayoung_api\\resources\data\kmdb_naver_merge.csv'
         path = os.path.abspath("")
-        fname = '\data\\kmdb_naver_merge.csv' 
+        fname = '\com_dayoung_api\\resources\data\kmdb_naver_merge.csv'
+        # path = os.path.abspath("")
+        # fname = '\data\\kmdb_naver_merge.csv' 
         kmdb_naver_df = pd.read_csv(path + fname, encoding='utf-8')
         print('***** kmdb 네이버 데이터 읽기 완료*****')
         return kmdb_naver_df
@@ -714,16 +715,42 @@ class RecoMovieDf:
         ##### 데이터 축소 #####
         '''
         subtitle_naver : Iron Man <b>2</b> -> Iron Man 2
+        director_naver : 상위 3명만 추출
+        actor_naver : 상위 3명만 추출
         '''
         sub_title_list = pd.Series.to_list(fill_na_df['subtitle_naver'])
-        mylist = []
+        mylist1 = []
         for d in range(0, len(sub_title_list)):
             new_eng_title = sub_title_list[d]
             new_eng_title = new_eng_title.replace('<b>','').replace('</b>', '')
-            mylist.append(new_eng_title)
-        new_subtitle_naver = pd.DataFrame(mylist, columns=['new_subtitle_naver'])
-        reduction_df = fill_na_df.drop(['subtitle_naver'], axis=1)
-        reduction_df = pd.concat([reduction_df, new_subtitle_naver], axis=1)
+            mylist1.append(new_eng_title)
+        new_subtitle_naver = pd.DataFrame(mylist1, columns=['new_subtitle_naver'])
+
+        director_list = pd.Series.to_list(fill_na_df['director_naver'])
+        mylist2 = []
+        for d in range(0, len(director_list)):
+            new_director = director_list[d]
+            new_director = new_director.replace('<b>','').replace('</b>', '')
+            drop_last_r = new_director.rstrip('|')
+            split_new_director = drop_last_r.split('|')
+            mylist2.append(str(split_new_director[:3]))
+        
+        new_director_df = pd.DataFrame(mylist2, columns=['new_director_naver'])
+
+        actor_list = pd.Series.to_list(fill_na_df['actor_naver'])
+        mylist3 = []
+        for d in range(0, len(actor_list)):
+            new_actor = actor_list[d]
+            new_actor = new_actor.replace('<b>','').replace('</b>', '')
+            drop_last_r = new_actor.rstrip('|')
+            split_new_actor = drop_last_r.split('|')
+            mylist3.append(str(split_new_actor[:3]))
+            
+        new_actor_df = pd.DataFrame(mylist3, columns=['new_actor_naver'])
+
+
+        reduction_df = fill_na_df.drop(['subtitle_naver', 'director_naver', 'actor_naver'], axis=1)
+        reduction_df = pd.concat([reduction_df, new_subtitle_naver, new_director_df, new_actor_df], axis=1)
         ##### 데이터 축소 #####
 
         ##### movie lens와 비교 컬럼 생성 #####
@@ -749,8 +776,8 @@ class RecoMovieDf:
                             'keyword',
                             'running_time',
                             'pubdate_naver',
-                            'director_naver',
-                            'actor_naver',
+                            'new_director_naver',
+                            'new_actor_naver',
                             'link_naver',
                             'image_naver',
                             'compare_column']]
@@ -762,8 +789,8 @@ class RecoMovieDf:
             'keyword':'keyword_kor',
             'running_time':'running_time_kor',
             'pubdate_naver':'year_kor',
-            'director_naver':'director_naver_kor',
-            'actor_naver':'actor_naver_kor',
+            'new_director_naver':'director_naver_kor',
+            'new_actor_naver':'actor_naver_kor',
             'link_naver':'link_naver',
             'image_naver':'image_naver',
             'compare_column':'compare_column'
@@ -837,9 +864,9 @@ class RecoMovieDf:
         print('***** 무비렌즈 KMDB NAVER MERGE 및 가공 완료 *****')
         return final_merge_df
 
-if __name__ == "__main__":
-    service = RecoMovieDf()
-    service.hook()
+# if __name__ == "__main__":
+#     service = RecoMovieDf()
+#     service.hook()
 
     print('***** 무비 렌즈 서비스 완료 *****')
 
