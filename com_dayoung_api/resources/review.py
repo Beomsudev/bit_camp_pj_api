@@ -1,7 +1,6 @@
 from flask_restful import Resource, reqparse
 from com_dayoung_api.ext.db import db, openSession
 from com_dayoung_api.resources.user import UserDto
-from com_dayoung_api.resources.movie import MovieDto
 
 class ReviewDto(db.Model):
     __tablename__ = "reviews"

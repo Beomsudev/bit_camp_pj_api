@@ -15,71 +15,63 @@ from flask_restful import Resource, reqparse
 
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy import func
 
 from com_dayoung_api.ext.db import db, openSession
 
 from com_dayoung_api.resources.reco_movie import RecoMovieDao, RecoMovieDto
 
 
-class MovieDto(db.Model):
+class MovieRatingDto(db.Model):
 
-    __tablename__ = 'movies'
+    __tablename__ = 'movie_ratings'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
 
-    # ,movieid,title,subtitle,description,imageurl,year,rating
-    movieid : str = db.Column(db.String(10), primary_key = True, index = True)
-    title : str = db.Column(db.String(30))
-    subtitle : str = db.Column(db.String(30))
-    description : str = db.Column(db.String(200))
-    imageurl : str = db.Column(db.String(100))
-    year : str = db.Column(db.String(5))
+    # 'userid', 'movieid', 'rating'
+    ratingid : str = db.Column(db.String(5), primary_key = True, index = True)
+    userid : str = db.Column(db.String(5))
+    movieid : str = db.Column(db.String(10))
     rating : float = db.Column(db.Float)
 
-    def __init__(self,movieid,title,subtitle,description,imageurl,year,rating):
+    def __init__(self,ratingid,userid,movieid,rating):
+        self.ratingid = ratingid
+        self.userid = userid
         self.movieid = movieid
-        self.title = title
-        self.subtitle = subtitle
-        self.description = description
-        self.imageurl = imageurl
-        self.year = year
         self.rating = rating
-
-    def __repr__(self):
-        return f'Movie(movieid=\'{self.movieid}\',\
-            title=\'{self.title}\',\
-            subtitle=\'{self.subtitle}\',\
-            description=\'{self.description}\',\
-            imageurl=\'{self.imageurl}\',\
-            year=\'{self.year}\',\
-            rating=\'{self.rating}\',)'
 
     def json(self):
         return {
+            'ratingid' : self.ratingid,
+            'userid' : self.userid,
             'movieid' : self.movieid,
-            'title' : self.title,
-            'subtitle' : self.subtitle,
-            'description' : self.description,
-            'imageurl' : self.imageurl,
-            'year' : self.year,
             'rating' : self.rating
         }
 
-class MovieVo:
+class MovieRatingVo:
+    ratingid: str = ''
+    userid: str = ''
     movieid: str = ''
-    title: str = ''
-    subtitle: str = ''
-    description: str = ''
-    imageurl: str = ''
-    year: str = ''
     rating: float = 0.0
+
 
 Session = openSession()
 session = Session()
-class MovieDao(MovieDto):
+class MovieRatingDao(MovieRatingDto):
+    
+    @staticmethod
+    def bulk():
+        print('***** [movie_rating] df 삽입 *****')
+        m = MovieRatingDf()
+        df = m.hook()
+        print(df)
+        session.bulk_insert_mappings(MovieRatingDto, df.to_dict(orient='records'))
+        session.commit()
+        session.close()
+        print('***** [movie_rating] df 삽입 완료 *****')
 
     @classmethod
     def count(cls):
-        return cls.query.count()
+        return session.query(func.count(MovieRatingDto.ratingid)).one()
 
     @classmethod
     def find_all(cls):
@@ -91,7 +83,7 @@ class MovieDao(MovieDto):
     @classmethod
     def find_by_title(cls, title):
         print('##### find title #####')
-        return session.query(MovieDto).filter(MovieDto.title.like(title)).all()
+        return session.query(MovieRatingDto).filter(MovieRatingDto.title.like(title)).all()
 
     @classmethod
     def find_by_id(cls, movieid):
@@ -109,11 +101,12 @@ class MovieDao(MovieDto):
     #     return json.loads(df.to_json(orient='records'))
             
     # movieid,title,subtitle,description,imageurl,year,rating
+
     @staticmethod
     def register_movie(movie):
         print('##### new movie data registering #####')
         print(movie)
-        newMovie = MovieDao(movieid = movie['movieid'],
+        newMovie = MovieRatingDao(movieid = movie['movieid'],
                             title = movie['title'],
                             subtitle = movie['subtitle'],
                             description = movie['description'],
@@ -125,15 +118,6 @@ class MovieDao(MovieDto):
         print('##### new movie data register complete #####')
 
 
-    @staticmethod   
-    def insert_many():
-        print('insert_many')
-        service = NaverMovie()
-        # df = service.hook()
-        # print(df.head())
-        # session.bulk_insert_mappings(MovieDto, df.to_dict(orient="records"))
-        # session.commit()
-        # session.close()
 
 # update [table] set [field] = '변경값' where = '조건값'
 # session.query(테이블명).filter(테이블명.필드명 == 조건 값).update({테이블명.필드명:변경 값})
@@ -142,16 +126,16 @@ class MovieDao(MovieDto):
     def modify_movie(movie):
         print('##### movie data modify #####')
         
-        Session = openSession()
-        session = Session()
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        session.query(MovieDto).filter(MovieDto.movieid == movie['movieid']).update({MovieDto.title:movie['title'],
-                                                                                    MovieDto.subtitle:movie['subtitle'],
-                                                                                    MovieDto.description:movie['description'],
-                                                                                    MovieDto.year:movie['imageurl'],
-                                                                                    MovieDto.rating:movie['year'],
-                                                                                    MovieDto.imageurl:movie['rating']})                                                        
-        session.commit()
+        # Session = openSession()
+        # session = Session()
+        # print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        # session.query(MovieDto).filter(MovieDto.movieid == movie['movieid']).update({MovieDto.title:movie['title'],
+        #                                                                             MovieDto.subtitle:movie['subtitle'],
+        #                                                                             MovieDto.description:movie['description'],
+        #                                                                             MovieDto.year:movie['imageurl'],
+        #                                                                             MovieDto.rating:movie['year'],
+        #                                                                             MovieDto.imageurl:movie['rating']})                                                        
+        # session.commit()
         print('##### movie data modify complete #####')
 
     @classmethod
@@ -182,12 +166,13 @@ class MovieRatingDf:
         print('***** 무비 렌즈 UI용 DF가공 완료 *****')
 
         return arrange_movie_lens_rating_df
+
     def read_movie_lens_rating_csv(self):
         print('***** 무비렌즈 평점 데이터 읽기*****')
-        # path = os.path.abspath("")
-        # fname = '\com_dayoung_api\\resources\data\movie_lens\ratings_small.csv'
         path = os.path.abspath("")
-        fname = '\data\movie_lens\\ratings_small.csv'
+        fname = '\com_dayoung_api\\resources\data\movie_lens\\ratings_small.csv'
+        # path = os.path.abspath("")
+        # fname = '\data\movie_lens\\ratings_small.csv'
         movie_lens_meta_df = pd.read_csv(path + fname, encoding='utf-8')
         print('***** 무비렌즈 평점 데이터 읽기 완료*****')
         return movie_lens_meta_df
@@ -204,8 +189,6 @@ class MovieRatingDf:
 
         ##### 필요없는 column 삭제 #####
         drop_df = movie_lens_keyword_df.drop(['timestamp'], axis=1)
-        print(drop_df)
-        print(drop_df.columns)
         ##### 필요없는 column 삭제 #####
 
         ##### 데이터 축소 #####
@@ -216,10 +199,20 @@ class MovieRatingDf:
         reduction_df = drop_df[(drop_df['userId'] < 71)]
         ##### 데이터 축소 #####
 
+        ##### ratingid column 추가 #####
+        mylist = []
+        for i in range(0, len(reduction_df['movieId'])):
+            mylist.append(i)
+        ratingid_column = pd.DataFrame(mylist, columns=['ratingid'])
+        reduction_df = pd.concat([reduction_df, ratingid_column], axis=1)
+        ##### ratingid column 추가 #####
+
+
         ##### column 정렬 및 이름 변경 #####
-        column_sort_df = reduction_df[['userId', 'movieId', 'rating']]
+        column_sort_df = reduction_df[['ratingid', 'userId', 'movieId', 'rating']]
 
         mycolumns = {
+            'ratingid':'ratingid',
             'userId':'userid',
             'movieId':'movieid',
             'rating':'rating'
@@ -253,79 +246,79 @@ if __name__ == "__main__":
 # parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
 # parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')
 
-class Movie(Resource):
+class MovieRating(Resource):
+    ...
+    # @staticmethod
+    # def post():
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('title', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('subtitle', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('description', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('imageurl', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')         
+    #     args = parser.parse_args()
+    #     print(args)
+    #     movies = MovieDto(args['movieid'], \
+    #                     args['title'], \
+    #                     args['subtitle'], \
+    #                     args['description'], \
+    #                     args['imageurl'], \
+    #                     args['year'], \
+    #                     args['rating'])
+    #     print('*********')
+    #     print(f'{args}')
+    #     try:
+    #         MovieDao.register_movie(args)
+    #         return{'code':0, 'message':'SUCCESS'}, 200
+    #     except:
+    #         return {'message':'An error occured registering the movie'}, 500
 
-    @staticmethod
-    def post():
-        parser = reqparse.RequestParser()
-        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('title', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('subtitle', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('description', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('imageurl', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')         
-        args = parser.parse_args()
-        print(args)
-        movies = MovieDto(args['movieid'], \
-                        args['title'], \
-                        args['subtitle'], \
-                        args['description'], \
-                        args['imageurl'], \
-                        args['year'], \
-                        args['rating'])
-        print('*********')
-        print(f'{args}')
-        try:
-            MovieDao.register_movie(args)
-            return{'code':0, 'message':'SUCCESS'}, 200
-        except:
-            return {'message':'An error occured registering the movie'}, 500
+    # @staticmethod
+    # def get(id: str):
+    #     print('##### get #####')
+    #     print(id)
+    #     try:
+    #         reco_movie = MovieDao.find_by_title(id)
+    #         data = reco_movie.json()
+    #         print(data)
+    #         return data, 200
+    #     except:
+    #         print('fail')
+    #         return {'message':'Title not found'}, 404
 
-    @staticmethod
-    def get(id: str):
-        print('##### get #####')
-        print(id)
-        try:
-            reco_movie = MovieDao.find_by_title(id)
-            data = reco_movie.json()
-            print(data)
-            return data, 200
-        except:
-            print('fail')
-            return {'message':'Title not found'}, 404
-
-    @staticmethod
-    def put():
-        parser = reqparse.RequestParser()
-        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('title', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('subtitle', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('description', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('imageurl', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')  
-        print('putputputputputputputput')
-        args = parser.parse_args()
-        print(args)
-        movies = MovieDto(args['movieid'], \
-                        args['title'], \
-                        args['subtitle'], \
-                        args['description'], \
-                        args['imageurl'], \
-                        args['year'], \
-                        args['rating'])
-        print('*********')
-        print(f'{args}')
+    # @staticmethod
+    # def put():
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('title', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('subtitle', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('description', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('imageurl', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
+    #     parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')  
+    #     print('putputputputputputputput')
+    #     args = parser.parse_args()
+    #     print(args)
+    #     movies = MovieDto(args['movieid'], \
+    #                     args['title'], \
+    #                     args['subtitle'], \
+    #                     args['description'], \
+    #                     args['imageurl'], \
+    #                     args['year'], \
+    #                     args['rating'])
+    #     print('*********')
+    #     print(f'{args}')
         
-        try:
-            print('************!!!!!!!!!!!!!!!!!!!***')
-            MovieDao.modify_movie(args)
-            return{'code':0, 'message':'SUCCESS'}, 200
-        except:
-            return {'message':'An error occured registering the movie'}, 500
+    #     try:
+    #         print('************!!!!!!!!!!!!!!!!!!!***')
+    #         MovieDao.modify_movie(args)
+    #         return{'code':0, 'message':'SUCCESS'}, 200
+    #     except:
+    #         return {'message':'An error occured registering the movie'}, 500
 
-class MovieDel(Resource):
+class MovieRatingDel(Resource):
 
     @staticmethod
     def post():
@@ -339,25 +332,25 @@ class MovieDel(Resource):
         print(movieid)
 
         try:
-            MovieDao.delete_movie(movieid)
+            MovieRatingDao.delete_movie(movieid)
             return{'code':0, 'message':'SUCCESS'}, 200
         except:
             return {'message':'An error occured registering the movie'}, 500
 
 
 
-class Movies(Resource):
+class MovieRatings(Resource):
     
     def post(self):
-        md = MovieDao()
-        md.insert_many('movies')
+        md = MovieRatingDao()
+        md.bulk('movies')
 
     def get(self):
         print('========== movie10 ==========')
-        data = MovieDao.find_all()
+        data = MovieRatingDao.find_all()
         return data, 200
 
-class MovieSearch(Resource):
+class MovieRatingSearch(Resource):
     def get(self, title):
         print("SEARCH 진입")
         print(f'타이틀 : {title}')
@@ -372,29 +365,3 @@ class MovieSearch(Resource):
         # print(f'Review type : {type(review[0])}')
         print(f'Review List : {movielist}')
         return movielist[:]
-
-# class Auth(Resource):
-
-#     def post(self):
-#         body = request.get_json()
-#         movie = MovieDto(**body)
-#         MovieDao.save(movie)
-#         id = movie.movieid
-        
-#         return {'id': str(id)}, 200 
-
-
-# class Access(Resource):
-
-#     def post(self):
-#         print('========== movie6 ==========')
-#         args = parser.parse_args()
-#         movie = MovieVo()
-#         movie.movieid = args.movieid
-#         # movie.password = args.password
-#         print(movie.movieid)
-#         # print(movie.password)
-#         data = MovieDao.login(movie)
-#         return data[0], 200
-
-

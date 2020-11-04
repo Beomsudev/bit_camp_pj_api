@@ -2,7 +2,7 @@ import logging
 from flask import Blueprint
 from flask_restful import Api
 from com_dayoung_api.resources.home import Home
-from com_dayoung_api.resources.movie import Movie, Movies, MovieSearch, MovieDel
+from com_dayoung_api.resources.movie_rating import MovieRating, MovieRatings, MovieRatingSearch, MovieRatingDel
 from com_dayoung_api.resources.reco_movie import RecoMovie, RecoMovies, RecoMovieSearch, RecoMovieDel
 from com_dayoung_api.resources.review import Review, Reviews
 # from com_dayoung_api.resources.actor import Actor, Actors
@@ -14,10 +14,10 @@ user = Blueprint('user', __name__, url_prefix='/api/user')
 users = Blueprint('users', __name__, url_prefix='/api/users')
 auth = Blueprint('auth', __name__, url_prefix='/api/auth')
 access = Blueprint('access', __name__, url_prefix='/api/access')
-movie = Blueprint('movie', __name__, url_prefix='/api/movie')
-movies = Blueprint('movies', __name__, url_prefix='/api/movies')
-moviesearch = Blueprint('moviesearch', __name__, url_prefix='/api/moviesearch')
-moviedel = Blueprint('moviedel', __name__, url_prefix='/api/moviedel')
+movie_rating = Blueprint('movie_rating', __name__, url_prefix='/api/movie-rating')
+movie_ratings = Blueprint('movie_ratings', __name__, url_prefix='/api/movie-ratings')
+movie_rating_search = Blueprint('movie_rating_search', __name__, url_prefix='/api/movie-rating-search')
+movie_rating_del = Blueprint('movie_rating_del', __name__, url_prefix='/api/movie-rating-del')
 recomovie = Blueprint('recomovie', __name__, url_prefix='/api/recomovie')
 recomovies = Blueprint('recomovies', __name__, url_prefix='/api/recomovies')
 recomoviesearch = Blueprint('recomoviesearch', __name__, url_prefix='/api/recomoviesearch')
@@ -32,10 +32,10 @@ api = Api(user)
 api = Api(users)
 api = Api(auth)
 api = Api(access)
-api = Api(movie)
-api = Api(movies)
-api = Api(moviesearch)
-api = Api(moviedel)
+api = Api(movie_rating)
+api = Api(movie_ratings)
+api = Api(movie_rating_search)
+api = Api(movie_rating_del)
 api = Api(recomovie)
 api = Api(recomovies)
 api = Api(recomoviesearch)
@@ -48,10 +48,10 @@ api = Api(reviews)
 def initialize_routes(api):
     print('========== 2 ==========')
     api.add_resource(Home, '/api')
-    api.add_resource(Movie, '/api/movie')
-    api.add_resource(Movies, '/api/movies')
-    api.add_resource(MovieSearch, '/api/moviesearch/<string:title>')
-    api.add_resource(MovieDel, '/api/moviedel')
+    api.add_resource(MovieRating, '/api/movie-rating')
+    api.add_resource(MovieRatings, '/api/movie-ratings')
+    api.add_resource(MovieRatingSearch, '/api/movie-rating-search/<string:title>')
+    api.add_resource(MovieRatingDel, '/api/movie-rating-del')
     api.add_resource(RecoMovie, '/api/recomovie')
     api.add_resource(RecoMovies, '/api/recomovies')
     api.add_resource(RecoMovieSearch, '/api/recomoviesearch/<string:title>')
@@ -84,12 +84,12 @@ def review_api_error(e):
     logging.exception('An error occurred during review request. %s' % str(e))
     return 'An internal error occurred.', 500
 
-@movie.errorhandler(500)
-def movie_api_error(e):
-    logging.exception('An error occurred during movie request. %s' % str(e))
+@movie_rating.errorhandler(500)
+def movie_rating_api_error(e):
+    logging.exception('An error occurred during movie_rating request. %s' % str(e))
     return 'An internal error occurred.', 500
 
-@movie.errorhandler(500)
+@recomovie.errorhandler(500)
 def reco_movie_api_error(e):
     logging.exception('An error occurred during reco_movie request. %s' % str(e))
     return 'An internal error occurred.', 500

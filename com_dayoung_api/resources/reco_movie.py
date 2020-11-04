@@ -5,7 +5,6 @@ import os
 import sys
 import urllib.request
 import csv
-import re
 import ast
 import time
 from pandas import DataFrame
@@ -132,7 +131,7 @@ class RecoMovieDao(RecoMovieDto):
     
     @staticmethod
     def bulk():
-        print('***** [movies_recommendation] df 삽입 완료 *****')
+        print('***** [movies_recommendation] df 삽입 *****')
         recomoviedf = RecoMovieDf()
         df = recomoviedf.hook()
         print(df)
@@ -951,6 +950,7 @@ class RecoMovies(Resource):
     @staticmethod
     def get():
         data = RecoMovieDao.find_all()
+        print(data[0])
         return data, 200        
 
 class RecoMovieSearch(Resource):
