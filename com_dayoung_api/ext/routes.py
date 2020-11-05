@@ -50,7 +50,7 @@ def initialize_routes(api):
     api.add_resource(Home, '/api')
     api.add_resource(MovieRating, '/api/movie-rating')
     api.add_resource(MovieRatings, '/api/movie-ratings')
-    api.add_resource(MovieRatingSearch, '/api/movie-rating-search/<string:title>')
+    api.add_resource(MovieRatingSearch, '/api/movie-rating-search/<string:ratingid>')
     api.add_resource(MovieRatingDel, '/api/movie-rating-del')
     api.add_resource(RecoMovie, '/api/recomovie')
     api.add_resource(RecoMovies, '/api/recomovies')

@@ -166,8 +166,6 @@ class RecoMovieDao(RecoMovieDto):
     def register_movie(movie):
         print('##### new movie data registering #####')
         print(movie)
-        Session = openSession()
-        session = Session()
         newMovie = RecoMovieDao(movieid = movie['movieid'],
                             title_kor = movie['title_kor'],
                             title_naver_eng = movie['title_naver_eng'],
@@ -190,9 +188,6 @@ class RecoMovieDao(RecoMovieDto):
     @staticmethod
     def modify_movie(movie):
         print('##### movie data modify #####')
-        
-        Session = openSession()
-        session = Session()
         print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         session.query(RecoMovieDto).filter(RecoMovieDto.movieid == movie['movieid']).update({RecoMovieDto.title_kor:movie['title_kor'],
                                                                                     RecoMovieDto.title_naver_eng:movie['title_naver_eng'],
@@ -216,10 +211,142 @@ class RecoMovieDao(RecoMovieDto):
         print('##### movie data delete #####')
         data = cls.query.get(movieid)
         db.session.delete(data)
-        db.session.commit()
         print('##### movie data delete complete #####')
 
-    
+# ==============================================================
+# ==============================================================
+# =================     Controller  ============================
+# ==============================================================
+# ==============================================================
+
+class RecoMovie(Resource):
+    @staticmethod
+    def post():
+        parser = reqparse.RequestParser()
+        parser.add_argument('movieid', type=int, required=False, help='This field should be a movieid')
+        parser.add_argument('title_kor', type=str, required=True, help='This field should be a title_kor')
+        parser.add_argument('title_naver_eng', type=str, required=True, help='This field should be a title_naver_eng')
+        parser.add_argument('genres_kor', type=str, required=True, help='This field should be a genres_kor')
+        parser.add_argument('keyword_kor', type=str, required=True, help='This field should be a keyword_kor')
+        parser.add_argument('running_time_kor', type=int, required=True, help='This field should be a running_time_kor')
+        parser.add_argument('year_kor', type=str, required=True, help='This field should be a year_kor')
+        parser.add_argument('director_naver_kor', type=str, required=True, help='This field should be a director_naver_kor')
+        parser.add_argument('actor_naver_kor', type=str, required=True, help='This field should be a actor_naver_kor')
+        parser.add_argument('movie_l_rating', type=float, required=True, help='This field should be a movie_l_rating')
+        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movie_l_rating_count')
+        parser.add_argument('movie_l_popularity', type=float, required=True, help='This field should be a movie_l_popularity')
+        parser.add_argument('link_naver', type=str, required=True, help='This field should be a link_naver')
+        parser.add_argument('image_naver', type=str, required=True, help='This field should be a image_naver')              
+        args = parser.parse_args()
+        print('*********')
+        print(args)
+        try:
+            RecoMovieDao.register_movie(args)
+            return{'code':0, 'message':'SUCCESS'}, 200
+        except:
+            return {'message':'An error occured registering the movie'}, 500
+
+    @staticmethod
+    def get(id: str):
+        print('##### get #####')
+        print(id)
+        try:
+            reco_movie = RecoMovieDao.find_by_title(id)
+            data = reco_movie.json()
+            print(data)
+            return data, 200
+        except:
+            print('fail')
+            return {'message':'Title not found'}, 404
+
+    @staticmethod
+    def put():
+        parser = reqparse.RequestParser()
+        parser.add_argument('movieid', type=int, required=True, help='This field should be a movieid')
+        parser.add_argument('title_kor', type=str, required=True, help='This field should be a title_kor')
+        parser.add_argument('title_naver_eng', type=str, required=True, help='This field should be a title_naver_eng')
+        parser.add_argument('genres_kor', type=str, required=True, help='This field should be a genres_kor')
+        parser.add_argument('keyword_kor', type=str, required=True, help='This field should be a keyword_kor')
+        parser.add_argument('running_time_kor', type=int, required=True, help='This field should be a running_time_kor')
+        parser.add_argument('year_kor', type=str, required=True, help='This field should be a year_kor')
+        parser.add_argument('director_naver_kor', type=str, required=True, help='This field should be a director_naver_kor')
+        parser.add_argument('actor_naver_kor', type=str, required=True, help='This field should be a actor_naver_kor')
+        parser.add_argument('movie_l_rating', type=float, required=True, help='This field should be a movie_l_rating')
+        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movie_l_rating_count')
+        parser.add_argument('movie_l_popularity', type=float, required=True, help='This field should be a movie_l_popularity')
+        parser.add_argument('link_naver', type=str, required=True, help='This field should be a link_naver')
+        parser.add_argument('image_naver', type=str, required=True, help='This field should be a image_naver')         
+        args = parser.parse_args()
+        print(args)
+        movies = RecoMovieDto(args['movieid'], \
+                        args['title_kor'], \
+                        args['title_naver_eng'], \
+                        args['genres_kor'], \
+                        args['keyword_kor'], \
+                        args['running_time_kor'], \
+                        args['year_kor'], \
+                        args['director_naver_kor'], \
+                        args['actor_naver_kor'], \
+                        args['movie_l_rating'], \
+                        args['movie_l_rating_count'], \
+                        args['movie_l_popularity'], \
+                        args['link_naver'], \
+                        args['image_naver'])
+        print('*********')
+        print(f'{args}')
+        try:
+            RecoMovieDao.modify_movie(args)
+            return{'code':0, 'message':'SUCCESS'}, 200
+        except:
+            return {'message':'An error occured registering the movie'}, 500
+
+class RecoMovies(Resource):
+    @staticmethod
+    def post():
+        rmd = RecoMovieDao()
+        rmd.bulk()
+
+    @staticmethod
+    def get():
+        data = RecoMovieDao.find_all()
+        print(data[0])
+        return data, 200        
+
+class RecoMovieSearch(Resource):
+    def get(self, title):
+        print("SEARCH 진입")
+        print(f'타이틀 : {title}')
+        movie = RecoMovieDao.find_by_title(title)
+        # review = {review[i]: review[i + 1] for i in range(0, len(review), 2)}
+        # review = json.dump(review)
+        movielist = []
+        # for review in reviews:
+            # reviewdic
+        for rev in movie:
+            movielist.append(rev.json())
+        # print(f'Review type : {type(review[0])}')
+        print(f'Review List : {movielist}')
+        return movielist[:]    
+
+class RecoMovieDel(Resource):
+
+    @staticmethod
+    def post():
+        parser = reqparse.RequestParser()
+        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')     
+        args = parser.parse_args()
+        print('*********')
+        print(f'{args}')
+        print('*********')
+        movieid = args['movieid']
+        print(movieid)
+
+        try:
+            RecoMovieDao.delete_movie(movieid)
+            return{'code':0, 'message':'SUCCESS'}, 200
+        except:
+            return {'message':'An error occured registering the movie'}, 500
+
 # ==============================================================
 # ==============================================================
 # ====================   Df for ui  ============================
@@ -886,135 +1013,3 @@ class RecoMovieDf:
 
     print('***** 무비 렌즈 서비스 완료 *****')
 
-# movieid,movie_l_title,movie_l_org_title,movie_l_genres,movie_l_year,movie_l_rating,movie_l_rating_count
-class RecoMovie(Resource):
-    @staticmethod
-    def post():
-        parser = reqparse.RequestParser()
-        parser.add_argument('movieid', type=int, required=False, help='This field should be a movieid')
-        parser.add_argument('title_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('title_naver_eng', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('genres_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('keyword_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('running_time_kor', type=int, required=True, help='This field should be a movieid')
-        parser.add_argument('year_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('director_naver_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('actor_naver_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_rating', type=float, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_popularity', type=float, required=True, help='This field should be a movieid')
-        parser.add_argument('link_naver', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('image_naver', type=str, required=True, help='This field should be a movieid')         
-        args = parser.parse_args()
-        print(args)
-
-        print('*********')
-        print(f'{args}')
-        try:
-            RecoMovieDao.register_movie(args)
-            return{'code':0, 'message':'SUCCESS'}, 200
-        except:
-            return {'message':'An error occured registering the movie'}, 500
-
-    @staticmethod
-    def get(id: str):
-        print('##### get #####')
-        print(id)
-        try:
-            reco_movie = RecoMovieDao.find_by_title(id)
-            data = reco_movie.json()
-            print(data)
-            return data, 200
-        except:
-            print('fail')
-            return {'message':'Title not found'}, 404
-
-    @staticmethod
-    def put():
-        parser = reqparse.RequestParser()
-        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('title_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('title_naver_eng', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('genres_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('keyword_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('running_time_kor', type=int, required=True, help='This field should be a movieid')
-        parser.add_argument('year_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('director_naver_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('actor_naver_kor', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_rating', type=float, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_popularity', type=float, required=True, help='This field should be a movieid')
-        parser.add_argument('link_naver', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('image_naver', type=str, required=True, help='This field should be a movieid')         
-        args = parser.parse_args()
-        print(args)
-        movies = RecoMovieDto(args['movieid'], \
-                        args['title_kor'], \
-                        args['title_naver_eng'], \
-                        args['genres_kor'], \
-                        args['keyword_kor'], \
-                        args['running_time_kor'], \
-                        args['year_kor'], \
-                        args['director_naver_kor'], \
-                        args['actor_naver_kor'], \
-                        args['movie_l_rating'], \
-                        args['movie_l_rating_count'], \
-                        args['movie_l_popularity'], \
-                        args['link_naver'], \
-                        args['image_naver'])
-        print('*********')
-        print(f'{args}')
-        
-        try:
-            print('************!!!!!!!!!!!!!!!!!!!***')
-            RecoMovieDao.modify_movie(args)
-            return{'code':0, 'message':'SUCCESS'}, 200
-        except:
-            return {'message':'An error occured registering the movie'}, 500
-
-class RecoMovies(Resource):
-    @staticmethod
-    def post():
-        rmd = RecoMovieDao()
-        rmd.bulk()
-
-    @staticmethod
-    def get():
-        data = RecoMovieDao.find_all()
-        print(data[0])
-        return data, 200        
-
-class RecoMovieSearch(Resource):
-    def get(self, title):
-        print("SEARCH 진입")
-        print(f'타이틀 : {title}')
-        movie = RecoMovieDao.find_by_title(title)
-        # review = {review[i]: review[i + 1] for i in range(0, len(review), 2)}
-        # review = json.dump(review)
-        movielist = []
-        # for review in reviews:
-            # reviewdic
-        for rev in movie:
-            movielist.append(rev.json())
-        # print(f'Review type : {type(review[0])}')
-        print(f'Review List : {movielist}')
-        return movielist[:]    
-
-class RecoMovieDel(Resource):
-
-    @staticmethod
-    def post():
-        parser = reqparse.RequestParser()
-        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')     
-        args = parser.parse_args()
-        print('*********')
-        print(f'{args}')
-        print('*********')
-        movieid = args['movieid']
-        print(movieid)
-
-        try:
-            RecoMovieDao.delete_movie(movieid)
-            return{'code':0, 'message':'SUCCESS'}, 200
-        except:
-            return {'message':'An error occured registering the movie'}, 500
