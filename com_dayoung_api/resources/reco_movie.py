@@ -211,6 +211,8 @@ class RecoMovieDao(RecoMovieDto):
         print('##### movie data delete #####')
         data = cls.query.get(movieid)
         db.session.delete(data)
+        db.session.commit()
+        db.session.close()
         print('##### movie data delete complete #####')
 
 # ==============================================================

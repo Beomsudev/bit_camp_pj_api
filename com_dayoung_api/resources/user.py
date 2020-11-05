@@ -41,7 +41,7 @@ class UserDto(db.Model):
     __tablename__ = 'users'
     __table_args__={'mysql_collate':'utf8_general_ci'}
 
-    user_id: int = db.Column(db.Integer, primary_key = True, index = True)
+    user_id: str = db.Column(db.String(10), primary_key = True, index = True)
     password: str = db.Column(db.String(1))
     name: str = db.Column(db.String(100))
     pclass: int = db.Column(db.Integer)
@@ -80,7 +80,7 @@ class UserDto(db.Model):
 
     
 class UserVo:
-    user_id: int = 0
+    user_id: str = ''
     password: str = ''
     name: str = ''
     pclass: int = 0
