@@ -22,19 +22,19 @@ with app.app_context():
 with app.app_context():
     print('데이터 DB 삽입')
     count_user = UserDao.count()
-    count_movierating = MovieRatingDao.count()
     count_reco_movie = RecoMovieDao.count()
+    count_movierating = MovieRatingDao.count()    
     print(f'Users Total Count is {count_user}')
-    print(f'Movies Total Count is {count_movierating[0]}')
     print(f'Reco_Movies Total Count is {count_reco_movie[0]}')
+    print(f'Movie Rating Total Count is {count_movierating[0]}')
 
     if count_user == 0:
         UserDao.insert_many()
         
-    if count_movierating[0] == 0:
-        MovieRatingDao.bulk()
-
     if count_reco_movie[0] == 0:
         RecoMovieDao.bulk()
+
+    if count_movierating[0] == 0:
+        MovieRatingDao.bulk()
 
 initialize_routes(api)

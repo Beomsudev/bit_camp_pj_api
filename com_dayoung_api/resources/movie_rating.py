@@ -21,6 +21,7 @@ from com_dayoung_api.ext.db import db, openSession
 
 from com_dayoung_api.resources.reco_movie import RecoMovieDao, RecoMovieDto
 
+from com_dayoung_api.resources.user import UserDao, UserDto
 
 class MovieRatingDto(db.Model):
 
@@ -29,11 +30,10 @@ class MovieRatingDto(db.Model):
 
     # 'userid', 'movieid', 'rating'
     ratingid : int = db.Column(db.Integer, primary_key = True, index = True)
-    userid : int = db.Column(db.Integer)
-    movieid : int = db.Column(db.Integer)
+    userid : int = db.Column(db.Integer, db.ForeignKey(UserDto.user_id))
+    movieid : int = db.Column(db.Integer, db.ForeignKey(RecoMovieDto.movieid))
     rating : float = db.Column(db.Float)
 
-    # item_id: int = db.Column(db.Integer, db.ForeignKey(ItemDto.item_id))
 
 
     def __init__(self,ratingid,userid,movieid,rating):
@@ -50,11 +50,11 @@ class MovieRatingDto(db.Model):
             'rating' : self.rating
         }
 
-class MovieRatingVo:
-    ratingid: int = 0
-    userid: str = ''
-    movieid: str = ''
-    rating: float = 0.0
+# class MovieRatingVo:
+#     ratingid: int = 0
+#     userid: int = 0
+#     movieid: int = 0
+#     rating: float = 0.0
 
 
 Session = openSession()
