@@ -25,7 +25,7 @@ with app.app_context():
     count_movierating = MovieRatingDao.count()
     count_reco_movie = RecoMovieDao.count()
     print(f'Users Total Count is {count_user}')
-    print(f'Movies Total Count is {count_movierating}')
+    print(f'Movies Total Count is {count_movierating[0]}')
     print(f'Reco_Movies Total Count is {count_reco_movie[0]}')
 
     if count_user == 0:

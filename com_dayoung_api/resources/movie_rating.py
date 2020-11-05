@@ -111,7 +111,6 @@ class MovieRatingDao(MovieRatingDto):
                             subtitle = movie['subtitle'],
                             description = movie['description'],
                             imageurl = movie['imageurl'],
-                            year = movie['year'],
                             rating = movie['rating'])
         session.add(newMovie)
         session.commit()
@@ -247,76 +246,69 @@ if __name__ == "__main__":
 # parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')
 
 class MovieRating(Resource):
-    ...
-    # @staticmethod
-    # def post():
-    #     parser = reqparse.RequestParser()
-    #     parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('title', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('subtitle', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('description', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('imageurl', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')         
-    #     args = parser.parse_args()
-    #     print(args)
-    #     movies = MovieDto(args['movieid'], \
-    #                     args['title'], \
-    #                     args['subtitle'], \
-    #                     args['description'], \
-    #                     args['imageurl'], \
-    #                     args['year'], \
-    #                     args['rating'])
-    #     print('*********')
-    #     print(f'{args}')
-    #     try:
-    #         MovieDao.register_movie(args)
-    #         return{'code':0, 'message':'SUCCESS'}, 200
-    #     except:
-    #         return {'message':'An error occured registering the movie'}, 500
+    @staticmethod
+    def post():
+        parser = reqparse.RequestParser()
+        parser.add_argument('ratingid', type=str, required=True, help='This field should be a ratingid')
+        parser.add_argument('userid', type=str, required=True, help='This field should be a userid')
+        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('rating', type=str, required=True, help='This field should be a rating')    
+        args = parser.parse_args()
+        print(args)
+        ratings = MovieRatingDto(args['ratingid'], \
+                        args['userid'], \
+                        args['movieid'], \
+                        args['rating'])
+        print('*********')
+        print(f'{args}')
+        try:
+            MovieRatingDto.register_rating(args)
+            return{'code':0, 'message':'SUCCESS'}, 200
+        except:
+            return {'message':'An error occured registering the rating'}, 500
 
-    # @staticmethod
-    # def get(id: str):
-    #     print('##### get #####')
-    #     print(id)
-    #     try:
-    #         reco_movie = MovieDao.find_by_title(id)
-    #         data = reco_movie.json()
-    #         print(data)
-    #         return data, 200
-    #     except:
-    #         print('fail')
-    #         return {'message':'Title not found'}, 404
+    @staticmethod
+    def get(id: str):
+        print('##### get #####')
+        print(id)
+        try:
+            reco_movie = MovieRatingDao.find_by_title(id)
+            data = reco_movie.json()
+            print(data)
+            return data, 200
+        except:
+            print('fail')
+            return {'message':'Title not found'}, 404
 
-    # @staticmethod
-    # def put():
-    #     parser = reqparse.RequestParser()
-    #     parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('title', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('subtitle', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('description', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('imageurl', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
-    #     parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')  
-    #     print('putputputputputputputput')
-    #     args = parser.parse_args()
-    #     print(args)
-    #     movies = MovieDto(args['movieid'], \
-    #                     args['title'], \
-    #                     args['subtitle'], \
-    #                     args['description'], \
-    #                     args['imageurl'], \
-    #                     args['year'], \
-    #                     args['rating'])
-    #     print('*********')
-    #     print(f'{args}')
+    @staticmethod
+    def put():
+        parser = reqparse.RequestParser()
+        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('title', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('subtitle', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('description', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('imageurl', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('year', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('rating', type=float, required=True, help='This field should be a movieid')  
+        print('putputputputputputputput')
+        args = parser.parse_args()
+        print(args)
+        movies = MovieRatingDto(args['movieid'], \
+                        args['title'], \
+                        args['subtitle'], \
+                        args['description'], \
+                        args['imageurl'], \
+                        args['year'], \
+                        args['rating'])
+        print('*********')
+        print(f'{args}')
         
-    #     try:
-    #         print('************!!!!!!!!!!!!!!!!!!!***')
-    #         MovieDao.modify_movie(args)
-    #         return{'code':0, 'message':'SUCCESS'}, 200
-    #     except:
-    #         return {'message':'An error occured registering the movie'}, 500
+        try:
+            print('************!!!!!!!!!!!!!!!!!!!***')
+            MovieDao.modify_movie(args)
+            return{'code':0, 'message':'SUCCESS'}, 200
+        except:
+            return {'message':'An error occured registering the movie'}, 500
 
 class MovieRatingDel(Resource):
 

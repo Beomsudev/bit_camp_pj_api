@@ -42,7 +42,7 @@ class RecoMovieDto(db.Model):
     'link_naver', 
     'image_naver'
     '''
-    movieid : str = db.Column(db.String(10), primary_key = True, index = True)
+    movieid : int = db.Column(db.Integer, primary_key = True, index = True)
     title_kor : str = db.Column(db.String(100))
     title_naver_eng : str = db.Column(db.String(100))
     genres_kor : str = db.Column(db.String(30))
@@ -108,7 +108,7 @@ class RecoMovieDto(db.Model):
         }
 
 class RecoMovieVo():
-    movieid: str = ''
+    movieid: int = 0
     title_kor: str = ''
     title_naver_eng: str = ''
     genres_kor: str = ''
@@ -891,7 +891,7 @@ class RecoMovie(Resource):
     @staticmethod
     def post():
         parser = reqparse.RequestParser()
-        parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('movieid', type=int, required=False, help='This field should be a movieid')
         parser.add_argument('title_kor', type=str, required=True, help='This field should be a movieid')
         parser.add_argument('title_naver_eng', type=str, required=True, help='This field should be a movieid')
         parser.add_argument('genres_kor', type=str, required=True, help='This field should be a movieid')
@@ -907,20 +907,7 @@ class RecoMovie(Resource):
         parser.add_argument('image_naver', type=str, required=True, help='This field should be a movieid')         
         args = parser.parse_args()
         print(args)
-        movies = RecoMovieDto(args['movieid'], \
-                        args['title_kor'], \
-                        args['title_naver_eng'], \
-                        args['genres_kor'], \
-                        args['keyword_kor'], \
-                        args['running_time_kor'], \
-                        args['year_kor'], \
-                        args['director_naver_kor'], \
-                        args['actor_naver_kor'], \
-                        args['movie_l_rating'], \
-                        args['movie_l_rating_count'], \
-                        args['movie_l_popularity'], \
-                        args['link_naver'], \
-                        args['image_naver'])
+
         print('*********')
         print(f'{args}')
         try:
