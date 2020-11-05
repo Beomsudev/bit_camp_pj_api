@@ -147,7 +147,7 @@ class RecoMovieDao(RecoMovieDto):
     @classmethod
     def find_by_title(cls, title):
         print('##### find title #####')
-        return session.query(RecoMovieDto).filter(RecoMovieDto.movie_l_title.like(title)).all()
+        return session.query(RecoMovieDto).filter(RecoMovieDto.title_kor.like(title)).all()
     
     @classmethod
     def find_by_id(cls, movieid):
@@ -169,16 +169,24 @@ class RecoMovieDao(RecoMovieDto):
         Session = openSession()
         session = Session()
         newMovie = RecoMovieDao(movieid = movie['movieid'],
-                            movie_l_title = movie['movie_l_title'],
-                            movie_l_org_title = movie['movie_l_org_title'],
-                            movie_l_genres = movie['movie_l_genres'],
-                            movie_l_year = movie['movie_l_year'],
+                            title_kor = movie['title_kor'],
+                            title_naver_eng = movie['title_naver_eng'],
+                            genres_kor = movie['genres_kor'],
+                            keyword_kor = movie['keyword_kor'],
+                            running_time_kor = movie['running_time_kor'],
+                            year_kor = movie['year_kor'],
+                            director_naver_kor = movie['director_naver_kor'],
+                            actor_naver_kor = movie['actor_naver_kor'],
                             movie_l_rating = movie['movie_l_rating'],
-                            movie_l_rating_count = movie['movie_l_rating_count'])
+                            movie_l_rating_count = movie['movie_l_rating_count'],
+                            movie_l_popularity = movie['movie_l_popularity'],
+                            link_naver = movie['link_naver'],
+                            image_naver = movie['image_naver'])
         session.add(newMovie)
         session.commit()
+        session.close()
         print('##### new movie data register complete #####')
-    
+
     @staticmethod
     def modify_movie(movie):
         print('##### movie data modify #####')
@@ -186,13 +194,21 @@ class RecoMovieDao(RecoMovieDto):
         Session = openSession()
         session = Session()
         print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        session.query(RecoMovieDto).filter(RecoMovieDto.movieid == movie['movieid']).update({RecoMovieDto.movie_l_title:movie['movie_l_title'],
-                                                                                    RecoMovieDto.movie_l_org_title:movie['movie_l_org_title'],
-                                                                                    RecoMovieDto.movie_l_genres:movie['movie_l_genres'],
-                                                                                    RecoMovieDto.movie_l_year:movie['movie_l_year'],
+        session.query(RecoMovieDto).filter(RecoMovieDto.movieid == movie['movieid']).update({RecoMovieDto.title_kor:movie['title_kor'],
+                                                                                    RecoMovieDto.title_naver_eng:movie['title_naver_eng'],
+                                                                                    RecoMovieDto.genres_kor:movie['genres_kor'],
+                                                                                    RecoMovieDto.keyword_kor:movie['keyword_kor'],
+                                                                                    RecoMovieDto.running_time_kor:movie['running_time_kor'],
+                                                                                    RecoMovieDto.year_kor:movie['year_kor'],
+                                                                                    RecoMovieDto.director_naver_kor:movie['director_naver_kor'],
+                                                                                    RecoMovieDto.actor_naver_kor:movie['actor_naver_kor'],
                                                                                     RecoMovieDto.movie_l_rating:movie['movie_l_rating'],
-                                                                                    RecoMovieDto.movie_l_rating_count:movie['movie_l_rating_count']})                                                        
+                                                                                    RecoMovieDto.movie_l_rating_count:movie['movie_l_rating_count'],
+                                                                                    RecoMovieDto.movie_l_popularity:movie['movie_l_popularity'],
+                                                                                    RecoMovieDto.link_naver:movie['link_naver'],
+                                                                                    RecoMovieDto.image_naver:movie['image_naver']})                                                        
         session.commit()
+        session.close()
         print('##### movie data modify complete #####')
 
     @classmethod
@@ -876,21 +892,35 @@ class RecoMovie(Resource):
     def post():
         parser = reqparse.RequestParser()
         parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_title', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_org_title', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_genres', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_year', type=int, required=True, help='This field should be a movieid')
+        parser.add_argument('title_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('title_naver_eng', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('genres_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('keyword_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('running_time_kor', type=int, required=True, help='This field should be a movieid')
+        parser.add_argument('year_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('director_naver_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('actor_naver_kor', type=str, required=True, help='This field should be a movieid')
         parser.add_argument('movie_l_rating', type=float, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movieid')         
+        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movieid')
+        parser.add_argument('movie_l_popularity', type=float, required=True, help='This field should be a movieid')
+        parser.add_argument('link_naver', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('image_naver', type=str, required=True, help='This field should be a movieid')         
         args = parser.parse_args()
         print(args)
         movies = RecoMovieDto(args['movieid'], \
-                        args['movie_l_title'], \
-                        args['movie_l_org_title'], \
-                        args['movie_l_genres'], \
-                        args['movie_l_year'], \
+                        args['title_kor'], \
+                        args['title_naver_eng'], \
+                        args['genres_kor'], \
+                        args['keyword_kor'], \
+                        args['running_time_kor'], \
+                        args['year_kor'], \
+                        args['director_naver_kor'], \
+                        args['actor_naver_kor'], \
                         args['movie_l_rating'], \
-                        args['movie_l_rating_count'])
+                        args['movie_l_rating_count'], \
+                        args['movie_l_popularity'], \
+                        args['link_naver'], \
+                        args['image_naver'])
         print('*********')
         print(f'{args}')
         try:
@@ -916,21 +946,35 @@ class RecoMovie(Resource):
     def put():
         parser = reqparse.RequestParser()
         parser.add_argument('movieid', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_title', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_org_title', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_genres', type=str, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_year', type=int, required=True, help='This field should be a movieid')
+        parser.add_argument('title_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('title_naver_eng', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('genres_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('keyword_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('running_time_kor', type=int, required=True, help='This field should be a movieid')
+        parser.add_argument('year_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('director_naver_kor', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('actor_naver_kor', type=str, required=True, help='This field should be a movieid')
         parser.add_argument('movie_l_rating', type=float, required=True, help='This field should be a movieid')
-        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movieid')         
+        parser.add_argument('movie_l_rating_count', type=int, required=True, help='This field should be a movieid')
+        parser.add_argument('movie_l_popularity', type=float, required=True, help='This field should be a movieid')
+        parser.add_argument('link_naver', type=str, required=True, help='This field should be a movieid')
+        parser.add_argument('image_naver', type=str, required=True, help='This field should be a movieid')         
         args = parser.parse_args()
         print(args)
         movies = RecoMovieDto(args['movieid'], \
-                        args['movie_l_title'], \
-                        args['movie_l_org_title'], \
-                        args['movie_l_genres'], \
-                        args['movie_l_year'], \
+                        args['title_kor'], \
+                        args['title_naver_eng'], \
+                        args['genres_kor'], \
+                        args['keyword_kor'], \
+                        args['running_time_kor'], \
+                        args['year_kor'], \
+                        args['director_naver_kor'], \
+                        args['actor_naver_kor'], \
                         args['movie_l_rating'], \
-                        args['movie_l_rating_count'])
+                        args['movie_l_rating_count'], \
+                        args['movie_l_popularity'], \
+                        args['link_naver'], \
+                        args['image_naver'])
         print('*********')
         print(f'{args}')
         
